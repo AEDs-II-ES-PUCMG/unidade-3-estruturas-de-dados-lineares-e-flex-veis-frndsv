@@ -6,7 +6,6 @@ public class Pilha<E> {
 	private Celula<E> fundo;
 
 	public Pilha() {
-
 		Celula<E> sentinela = new Celula<E>();
 		fundo = sentinela;
 		topo = sentinela;
@@ -18,12 +17,10 @@ public class Pilha<E> {
 	}
 
 	public void empilhar(E item) {
-
 		topo = new Celula<E>(item, topo);
 	}
 
 	public E desempilhar() {
-
 		E desempilhado = consultarTopo();
 		topo = topo.getProximo();
 		return desempilhado;
@@ -38,6 +35,18 @@ public class Pilha<E> {
 
 		return topo.getItem();
 
+	}
+
+	public StringBuilder imprimirPilha() {
+		Celula<E> aux = new Celula<E>();
+		StringBuilder pilhaBuilder = new StringBuilder();
+		aux = topo;
+		for (int i = 0; i < 6; i++) {
+			pilhaBuilder.append(aux.getItem());
+            aux = aux.getProximo();
+        }
+
+		return pilhaBuilder;
 	}
 
 	/**
@@ -57,4 +66,6 @@ public class Pilha<E> {
 		// TODO
 		return null;
 	}
+
+
 }

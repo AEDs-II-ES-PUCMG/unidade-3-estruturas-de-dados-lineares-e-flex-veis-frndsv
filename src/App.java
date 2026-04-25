@@ -64,6 +64,7 @@ public class App {
         System.out.println("4 - Iniciar novo pedido");
         System.out.println("5 - Fechar pedido");
         System.out.println("6 - Listar produtos dos pedidos mais recentes");
+        System.out.println("7 - Cadastro de matricula");
         System.out.println("0 - Sair");
         System.out.print("Digite sua opção: ");
         return Integer.parseInt(teclado.nextLine());
@@ -201,14 +202,29 @@ public class App {
     	
     	return pedido;
     }
+
+    public static void cadastroMatricula() {
+        Pilha<Integer> minhaPilha = new Pilha<Integer>();
+        int digitoMatricula = 0;
+        for (int i = 0; i < 6; i++) {
+            digitoMatricula = lerOpcao("Digite um digito da sua matricula", Integer.class);
+            minhaPilha.empilhar(digitoMatricula);
+        }
+
+        StringBuilder minhaMatricula = minhaPilha.imprimirPilha();
+       
+        System.out.println("Sua matricula é: " + minhaMatricula.toString());
+    }
     
     /**
      * Finaliza um pedido, momento no qual ele deve ser armazenado em uma pilha de pedidos.
      * @param pedido O pedido que deve ser finalizado.
      */
     public static void finalizarPedido(Pedido pedido) {
-    	
-    	// TODO
+    	Pilha<Pedido> pilhaPedidos = new Pilha<Pedido>();
+        pilhaPedidos.empilhar(pedido);
+        System.out.println(pilhaPedidos.consultarTopo());
+
     }
     
     public static void listarProdutosPedidosRecentes() {
@@ -227,7 +243,7 @@ public class App {
         
         int opcao = -1;
       
-        do{
+        do {
             opcao = menu();
             switch (opcao) {
                 case 1 -> listarTodosOsProdutos();
@@ -236,6 +252,7 @@ public class App {
                 case 4 -> pedido = iniciarPedido();
                 case 5 -> finalizarPedido(pedido);
                 case 6 -> listarProdutosPedidosRecentes();
+                case 7 -> cadastroMatricula();
             }
             pausa();
         }while(opcao != 0);       
