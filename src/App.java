@@ -16,6 +16,9 @@ public class App {
     /** Vetor de produtos cadastrados */
     static Produto[] produtosCadastrados;
 
+    /** Pilha de produtos mais recentemente vendidos */
+    static Pilha<Produto> pilhaProdutosRecentes = new Pilha<>();
+
     /** Quantidade de produtos cadastrados atualmente no vetor */
     static int quantosProdutos = 0;
 
@@ -64,6 +67,7 @@ public class App {
         System.out.println("4 - Iniciar novo pedido");
         System.out.println("5 - Fechar pedido");
         System.out.println("6 - Listar produtos dos pedidos mais recentes");
+        System.out.println("7 - Cadastro de matricula");
         System.out.println("0 - Sair");
         System.out.print("Digite sua opção: ");
         return Integer.parseInt(teclado.nextLine());
@@ -201,19 +205,52 @@ public class App {
     	
     	return pedido;
     }
+
+    
+    public static void cadastroMatricula() {
+        Pilha<Integer> minhaPilha = new Pilha<Integer>();
+        int digitoMatricula = 0;
+        for (int i = 0; i < 6; i++) {
+            digitoMatricula = lerOpcao("Digite um digito da sua matricula", Integer.class);
+            minhaPilha.empilhar(digitoMatricula);
+        }
+
+        StringBuilder minhaMatricula = minhaPilha.imprimirPilha();
+       
+        System.out.println("Sua matricula é: " + minhaMatricula.toString());
+    }
+
     
     /**
      * Finaliza um pedido, momento no qual ele deve ser armazenado em uma pilha de pedidos.
      * @param pedido O pedido que deve ser finalizado.
      */
     public static void finalizarPedido(Pedido pedido) {
-    	
-    	// TODO
+        pilhaPedidos.empilhar(pedido);
+
+        Produto[] produtos = pedido.getProdutos();
+
+        for (int i = 0; i < pedido.getQuantosProdutos(); i++) {
+            pilhaProdutosRecentes.empilhar(produtos[i]);
+        }
+
+        System.out.println("Pedido finalizado com sucesso!");
     }
     
     public static void listarProdutosPedidosRecentes() {
-    	
-    	// TODO
+
+        int k = lerOpcao(
+            "Quantos produtos recentes deseja visualizar?",
+            Integer.class
+        );
+
+        Pilha<Produto> subpilha = pilhaProdutosRecentes.subPilha(k);
+
+        System.out.println("Produtos mais recentes:");
+
+        while (!subpilha.vazia()) {
+            System.out.println(subpilha.desempilhar());
+        }
     }
     
 	public static void main(String[] args) {
@@ -236,6 +273,7 @@ public class App {
                 case 4 -> pedido = iniciarPedido();
                 case 5 -> finalizarPedido(pedido);
                 case 6 -> listarProdutosPedidosRecentes();
+                case 7 -> cadastroMatricula();
             }
             pausa();
         }while(opcao != 0);       

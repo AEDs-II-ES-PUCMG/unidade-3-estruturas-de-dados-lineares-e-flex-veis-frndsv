@@ -40,6 +40,19 @@ public class Pilha<E> {
 
 	}
 
+	public StringBuilder imprimirPilha() {
+		Celula<E> aux = new Celula<E>();
+		StringBuilder pilhaBuilder = new StringBuilder();
+		aux = topo;
+		for (int i = 0; i < 6; i++) {
+			pilhaBuilder.append(aux.getItem());
+            aux = aux.getProximo();
+        }
+
+		return pilhaBuilder;
+	}
+
+
 	/**
 	 * Cria e devolve uma nova pilha contendo os primeiros numItens elementos
 	 * do topo da pilha atual.
@@ -53,8 +66,32 @@ public class Pilha<E> {
 	 * @throws IllegalArgumentException se a pilha não contém numItens elementos.
 	 */
 	public Pilha<E> subPilha(int numItens) {
-		
-		// TODO
-		return null;
+
+		if (numItens < 0) {
+			throw new IllegalArgumentException("Número inválido!");
+		}
+
+		Pilha<E> aux = new Pilha<>();
+		Pilha<E> resultado = new Pilha<>();
+
+		Celula<E> atual = topo;
+
+		int contador = 0;
+
+		while (atual != fundo && contador < numItens) {
+			aux.empilhar(atual.getItem());
+			atual = atual.getProximo();
+			contador++;
+		}
+
+		if (contador < numItens) {
+			throw new IllegalArgumentException("A pilha não possui essa quantidade de elementos!");
+		}
+
+		while (!aux.vazia()) {
+			resultado.empilhar(aux.desempilhar());
+		}
+
+		return resultado;
 	}
 }
