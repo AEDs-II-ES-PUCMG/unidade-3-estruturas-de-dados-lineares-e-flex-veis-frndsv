@@ -40,14 +40,29 @@ public class Pilha<E> {
 
 	}
 
+	private int consultarTamanho(){
+
+		int contador = 0;
+
+		Celula<E> atual = topo;
+		while (atual != fundo) {
+			atual = atual.getProximo();
+			contador++;
+		}
+
+		return contador;
+	}
+
 	public StringBuilder imprimirPilha() {
 		Celula<E> aux = new Celula<E>();
 		StringBuilder pilhaBuilder = new StringBuilder();
 		aux = topo;
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < consultarTamanho(); i++) {
 			pilhaBuilder.append(aux.getItem());
             aux = aux.getProximo();
         }
+
+		pilhaBuilder.append("\n");
 
 		return pilhaBuilder;
 	}

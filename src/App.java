@@ -19,11 +19,18 @@ public class App {
     /** Pilha de produtos mais recentemente vendidos */
     static Pilha<Produto> pilhaProdutosRecentes = new Pilha<>();
 
+    /** Fila de produtos mais recentemente vendidos */
+    static Fila<Produto> filaProdutosRecentes = new Fila<>();
+
+
     /** Quantidade de produtos cadastrados atualmente no vetor */
     static int quantosProdutos = 0;
 
     /** Pilha de pedidos */
     static Pilha<Pedido> pilhaPedidos = new Pilha<>();
+
+     /** Fila de pedidos */
+    static Fila<Pedido> filaPedidos = new Fila<>();
         
     static void limparTela() {
         System.out.print("\033[H\033[2J");
@@ -67,7 +74,9 @@ public class App {
         System.out.println("4 - Iniciar novo pedido");
         System.out.println("5 - Fechar pedido");
         System.out.println("6 - Listar produtos dos pedidos mais recentes");
-        System.out.println("7 - Cadastro de matricula");
+        System.out.println("7 - Cadastro de matricula (Teste preliminar)");
+        System.out.println("8 - Imprimir todos os pedidos realizados");
+        System.out.println("9 - Cadastro de nome (Teste preliminar)");
         System.out.println("0 - Sair");
         System.out.print("Digite sua opção: ");
         return Integer.parseInt(teclado.nextLine());
@@ -220,12 +229,42 @@ public class App {
         System.out.println("Sua matricula é: " + minhaMatricula.toString());
     }
 
+        
+    public static void cadastroNome() {
+        Fila<Character> filaNome = new Fila<Character>();
+        int ocorrencias = 0;
+
+        /* Ocorrencias de letras no meu nome :)
+         A, E, R - 4
+         F, I, S - 3
+         N - 2 
+         D, O, V - 1
+         */
+        Character[] vetorNome = {'S', 'O', 'F', 'I', 'A',
+                                 'F', 'E', 'R', 'N', 'A', 'N', 'D', 'E', 'S',
+                                 'F', 'E', 'R', 'R', 'E', 'I', 'R', 'A',
+                                 'S', 'I', 'L', 'V', 'A'};
+        for (int i = 0; i < vetorNome.length; i++) {
+            filaNome.enfileirar(vetorNome[i]);
+        }
+        
+        Character caractereDesejado;
+
+        System.out.print("Digite o caractere que você deseja consultar suas ocorrencias: ");
+        caractereDesejado = teclado.nextLine().charAt(0);
+
+        ocorrencias = filaNome.contarCaracter(caractereDesejado);
+       
+        System.out.println("O caractere desejado aparece: " + ocorrencias + " vezes");
+    }
+
     
     /**
      * Finaliza um pedido, momento no qual ele deve ser armazenado em uma pilha de pedidos.
      * @param pedido O pedido que deve ser finalizado.
      */
     public static void finalizarPedido(Pedido pedido) {
+        filaPedidos.enfileirar(pedido);
         pilhaPedidos.empilhar(pedido);
 
         Produto[] produtos = pedido.getProdutos();
@@ -252,6 +291,14 @@ public class App {
             System.out.println(subpilha.desempilhar());
         }
     }
+
+    public static void imprimirPedidos() {
+
+        StringBuilder pedidosRegistrados =  pilhaPedidos.imprimirPilha();
+       
+        System.out.println("LISTA DE PEDIDOS QUE ESTÃO REGISTRADOS EM NOSSO SISTEMA :D ");
+        System.out.println(pedidosRegistrados.toString());
+    }
     
 	public static void main(String[] args) {
 		
@@ -274,6 +321,8 @@ public class App {
                 case 5 -> finalizarPedido(pedido);
                 case 6 -> listarProdutosPedidosRecentes();
                 case 7 -> cadastroMatricula();
+                case 8 -> imprimirPedidos();
+                case 9 -> cadastroNome();
             }
             pausa();
         }while(opcao != 0);       

@@ -120,7 +120,7 @@ public class Pedido implements Comparable<Pedido>{
 			stringPedido.append("parcelado.\n");
 		}
 		
-		stringPedido.append("Valor total do pedido: R$ " + String.format("%.2f", valorFinal()));
+		stringPedido.append("Valor total do pedido: R$ " + String.format("%.2f \n", valorFinal()));
 		
 		return stringPedido.toString();
 	}
