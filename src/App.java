@@ -31,6 +31,10 @@ public class App {
 
      /** Fila de pedidos */
     static Fila<Pedido> filaPedidos = new Fila<>();
+
+    private static Lista<Pedido> pedidos = new Lista<>();
+
+    private static Lista<Produto> listaProdutosRecentes = new Lista<>();
         
     static void limparTela() {
         System.out.print("\033[H\033[2J");
@@ -77,11 +81,14 @@ public class App {
         System.out.println("7 - Cadastro de matricula (Teste preliminar)");
         System.out.println("8 - Imprimir todos os pedidos realizados");
         System.out.println("9 - Cadastro de nome (Teste preliminar)");
+        System.out.println("10 - Processar lote de pedidos");
+        System.out.println("11 - Filtrar pedidos por produto");
         System.out.println("0 - Sair");
+
         System.out.print("Digite sua opção: ");
+
         return Integer.parseInt(teclado.nextLine());
     }
-    
     /**
      * Lê os dados de um arquivo-texto e retorna um vetor de produtos. Arquivo-texto no formato
      * N  (quantidade de produtos) <br/>
@@ -156,7 +163,7 @@ public class App {
     	System.out.println("Digite o nome ou a descrição do produto desejado:");
         descricao = teclado.nextLine();
         for (int i = 0; (i < quantosProdutos && !localizado); i++) {
-        	if (produtosCadastrados[i].descricao.equals(descricao)) {
+        	if (produtosCadastrados[i].descricao.equalsIgnoreCase(descricao)) {
         		produto = produtosCadastrados[i];
         		localizado = true;
     		}
@@ -185,7 +192,7 @@ public class App {
         for (int i = 0; i < quantosProdutos; i++) {
         	System.out.println(String.format("%02d - %s", (i + 1), produtosCadastrados[i].toString()));
         }
-    }
+    }  
     
     /** 
      * Inicia um novo pedido.
@@ -198,6 +205,7 @@ public class App {
     	Pedido pedido = new Pedido(LocalDate.now(), formaPagamento);
     	Produto produto;
     	int numProdutos;
+        int quantidade;
     	
     	listarTodosOsProdutos();
     	System.out.println("Incluindo produtos no pedido...");
@@ -208,7 +216,8 @@ public class App {
         		System.out.println("Produto não encontrado");
         		i--;
         	} else {
-        		pedido.incluirProduto(produto);
+        		quantidade = lerOpcao("Quantos itens desse produto serão incluídos no pedido?", Integer.class);
+        		pedido.incluirProduto(produto, quantidade);
         	}
         }
     	
@@ -264,41 +273,65 @@ public class App {
      * @param pedido O pedido que deve ser finalizado.
      */
     public static void finalizarPedido(Pedido pedido) {
-        filaPedidos.enfileirar(pedido);
-        pilhaPedidos.empilhar(pedido);
 
-        Produto[] produtos = pedido.getProdutos();
+        pedidos.inserirFinal(pedido);
+        Lista<ItemDePedido> itensPedido = pedido.getItensDoPedido();
+        Celula<ItemDePedido> aux = itensPedido.getPrimeiro().getProximo();
+        while (aux != null) {
+            ItemDePedido itemAtual = aux.getItem();
+            Produto produtoAtual = itemAtual.getProduto();
 
-        for (int i = 0; i < pedido.getQuantosProdutos(); i++) {
-            pilhaProdutosRecentes.empilhar(produtos[i]);
+            listaProdutosRecentes.inserirFinal(produtoAtual);
+            aux = aux.getProximo();
         }
 
         System.out.println("Pedido finalizado com sucesso!");
     }
+
+    public static void processarLotePedidos() {
+        int quantidade = lerOpcao("Quantos pedidos deseja processar?", Integer.class);
+        Lista<Pedido> lote = pedidos.extrairLote(quantidade);
+        System.out.println("PEDIDOS PROCESSADOS:");
+        lote.imprimir();
+    }
     
     public static void listarProdutosPedidosRecentes() {
 
-        int k = lerOpcao(
-            "Quantos produtos recentes deseja visualizar?",
-            Integer.class
-        );
+        int k = lerOpcao("Quantos produtos recentes deseja visualizar?", Integer.class);
 
-        Pilha<Produto> subpilha = pilhaProdutosRecentes.subPilha(k);
+        Lista<Produto> subLista = listaProdutosRecentes.subLista(k);
 
         System.out.println("Produtos mais recentes:");
 
-        while (!subpilha.vazia()) {
-            System.out.println(subpilha.desempilhar());
+        while (!subLista.vazia()) {
+            System.out.println(subLista.removerInicio());
         }
     }
 
     public static void imprimirPedidos() {
 
-        StringBuilder pedidosRegistrados =  pilhaPedidos.imprimirPilha();
+        StringBuilder pedidosRegistrados =  pedidos.imprimirLista();
        
         System.out.println("LISTA DE PEDIDOS QUE ESTÃO REGISTRADOS EM NOSSO SISTEMA :D ");
         System.out.println(pedidosRegistrados.toString());
     }
+
+    public static void filtrarPorProduto() {
+
+        System.out.print("Digite a descrição do produto: ");
+
+        String descricao = teclado.nextLine();
+
+        Lista<Pedido> pedidosFiltrados = pedidos.filtrar(new CondicaoFiltrarPedido(descricao));
+
+        if (pedidosFiltrados.vazia()) {
+            System.out.println("Nenhum pedido encontrado.");
+        } else {
+            System.out.println("PEDIDOS ENCONTRADOS:");
+            pedidosFiltrados.imprimir();
+        }
+    }
+
     
 	public static void main(String[] args) {
 		
@@ -323,6 +356,8 @@ public class App {
                 case 7 -> cadastroMatricula();
                 case 8 -> imprimirPedidos();
                 case 9 -> cadastroNome();
+                case 10 -> processarLotePedidos();
+                case 11 -> filtrarPorProduto();
             }
             pausa();
         }while(opcao != 0);       

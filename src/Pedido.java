@@ -15,14 +15,11 @@ public class Pedido implements Comparable<Pedido>{
 	/** Porcentagem de desconto para pagamentos à vista */
 	private static final double DESCONTO_PG_A_VISTA = 0.15;
 	
-	/** Vetor para armazenar os produtos do pedido */
-	private Produto[] produtos;
-	
+	/** Lista para armazenar os itens do pedido */
+	private Lista<ItemDePedido> itensDePedido;
+
 	/** Data de criação do pedido */
 	private LocalDate dataPedido;
-	
-	/** Indica a quantidade total de produtos no pedido até o momento */
-	private int quantProdutos = 0;
 	
 	/** Indica a forma de pagamento do pedido sendo: 1, pagamento à vista; 2, pagamento parcelado */
 	private int formaDePagamento;
@@ -34,10 +31,15 @@ public class Pedido implements Comparable<Pedido>{
 	public Pedido(LocalDate dataPedido, int formaDePagamento) {
 		
 		idPedido = ultimoID++;
-		produtos = new Produto[MAX_PRODUTOS];
-		quantProdutos = 0;
+		itensDePedido = new Lista<>();
 		this.dataPedido = dataPedido;
 		this.formaDePagamento = formaDePagamento;
+	}
+
+	public ItemDePedido existeNoPedido(Produto produto) {
+		ItemDePedido itemDePedidoProcurado = new ItemDePedido(produto, 0, 0.1);
+
+		return itensDePedido.buscarPor((item1, item2) -> item1.equals(item2) ? 0 : 1, itemDePedidoProcurado);
 	}
 	
 	/**
@@ -45,12 +47,21 @@ public class Pedido implements Comparable<Pedido>{
      * @param novo O produto a ser incluído no pedido
      * @return true/false indicando se a inclusão do produto no pedido foi realizada com sucesso.
      */
-	public boolean incluirProduto(Produto novo) {
-		
-		if (quantProdutos < MAX_PRODUTOS) {
-			produtos[quantProdutos++] = novo;
+	public boolean incluirProduto(Produto novo, int quantidade) {
+
+		ItemDePedido itemDePedido = existeNoPedido(novo);
+
+		if (itemDePedido != null) {
+
+			itemDePedido.setQuantidade(quantidade + itemDePedido.getQuantidade());
 			return true;
 		}
+
+		if (itensDePedido.tamanho() < MAX_PRODUTOS) {
+			itensDePedido.inserirFinal(new ItemDePedido(novo, quantidade, novo.valorDeVenda()));
+			return true;
+		}
+
 		return false;
 	}
 	
@@ -58,27 +69,29 @@ public class Pedido implements Comparable<Pedido>{
      * Calcula e retorna o valor final do pedido (soma do valor de venda de todos os produtos do pedido).
      * Caso a forma de pagamento do pedido seja à vista, aplica o desconto correspondente.
      * @return Valor final do pedido (double)
-     */
+	*/
 	public double valorFinal() {
-		
-		double valorPedido = 0;
-		BigDecimal valorPedidoBD;
-		
-		for (int i = 0; i < quantProdutos; i++) {
-			valorPedido += produtos[i].valorDeVenda();
-		}
-		
+
+		double valorPedido = itensDePedido.somarMultiplicacoes(
+				item -> item.getPrecoVenda(),
+				item -> item.getQuantidade()
+		);
+
 		if (formaDePagamento == 1) {
 			valorPedido = valorPedido * (1.0 - DESCONTO_PG_A_VISTA);
 		}
-		
-		valorPedidoBD = new BigDecimal(Double.toString(valorPedido));
-        
+
+		BigDecimal valorPedidoBD =
+				new BigDecimal(Double.toString(valorPedido));
+
 		valorPedidoBD = valorPedidoBD.setScale(2, RoundingMode.HALF_UP);
-        
-        return valorPedidoBD.doubleValue();
+
+		return valorPedidoBD.doubleValue();
 	}
-	
+
+	public Lista<ItemDePedido> getItensDoPedido() {
+		return itensDePedido;
+	}
 	/**
      * Representação, em String, do pedido.
      * Contém um cabeçalho com seu código identificador, sua data e o número de produtos no pedido.
@@ -98,32 +111,35 @@ public class Pedido implements Comparable<Pedido>{
      * percentual de desconto - se for o caso - e valor a pagar)
      */
 	@Override
-	public String toString() {
-		
-		StringBuilder stringPedido = new StringBuilder();
-		
-		stringPedido.append(String.format("Número do pedido: %02d\n", idPedido));
-		
-		DateTimeFormatter formatoData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		stringPedido.append("Data do pedido: " + formatoData.format(dataPedido) + "\n");
-		
-		stringPedido.append("Pedido com " + quantProdutos + " produtos.\n");
+    public String toString() {
+
+        StringBuilder stringPedido = new StringBuilder();
+
+        stringPedido.append(String.format("Número do pedido: %02d\n", idPedido));
+
+        DateTimeFormatter formatoData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        stringPedido.append("Data do pedido: " + formatoData.format(dataPedido) + "\n");
+
+        stringPedido.append("Pedido com " + itensDePedido.tamanho() + " produtos.\n");
 		stringPedido.append("Produtos no pedido:\n");
-		for (int i = 0; i < quantProdutos; i++ ) {
-			stringPedido.append(produtos[i].toString() + "\n");
-		}
-		
-		stringPedido.append("Pedido pago ");
-		if (formaDePagamento == 1) {
-			stringPedido.append("à vista. Percentual de desconto: " + String.format("%.2f", DESCONTO_PG_A_VISTA * 100) + "%\n");
-		} else {
-			stringPedido.append("parcelado.\n");
-		}
-		
-		stringPedido.append("Valor total do pedido: R$ " + String.format("%.2f \n", valorFinal()));
-		
-		return stringPedido.toString();
-	}
+
+        for (ItemDePedido itemPedido : itensDePedido) {
+            stringPedido.append(itemPedido.toString()).append("\n");
+        }
+
+        stringPedido.append("Pedido pago ");
+
+        if (formaDePagamento == 1) {
+            stringPedido.append("à vista. Percentual de desconto: " + String.format("%.2f", DESCONTO_PG_A_VISTA * 100) + "%\n");
+        } else {
+            stringPedido.append("parcelado.\n");
+        }
+
+        stringPedido.append("Valor total do pedido: R$ " + String.format("%.2f \n", valorFinal()));
+
+        return stringPedido.toString();
+    }
 	
     /**
      * Comparação padrão do pedido: identificador.
@@ -152,11 +168,4 @@ public class Pedido implements Comparable<Pedido>{
     	return idPedido;
     }
     
-    public int getQuantosProdutos() {
-    	return quantProdutos;
-    }
-    
-    public Produto[] getProdutos() {
-    	return produtos;
-    }
 }

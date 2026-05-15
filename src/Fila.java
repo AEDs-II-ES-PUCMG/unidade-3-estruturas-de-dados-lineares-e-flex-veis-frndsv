@@ -92,4 +92,22 @@ public class Fila<E> {
 			}
 		} 	
 	}
+
+	public Fila<E> extrairLote(int numItens) {
+
+		Fila<E> novaFila = new Fila<E>();
+
+		int contador = 0;
+
+		while (!this.vazia() && contador < numItens) {
+
+			E item = this.desenfileirar();
+
+			novaFila.enfileirar(item);
+
+			contador++;
+		}
+
+		return novaFila;
+	}
 }
