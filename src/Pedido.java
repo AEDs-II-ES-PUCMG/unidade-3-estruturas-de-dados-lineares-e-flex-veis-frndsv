@@ -29,7 +29,6 @@ public class Pedido implements Comparable<Pedido>{
 	 *  armazenar a data, o código identificador e a forma de pagamento informados para o pedido. 
 	 */  
 	public Pedido(LocalDate dataPedido, int formaDePagamento) {
-		
 		idPedido = ultimoID++;
 		itensDePedido = new Lista<>();
 		this.dataPedido = dataPedido;
@@ -39,7 +38,7 @@ public class Pedido implements Comparable<Pedido>{
 	public ItemDePedido existeNoPedido(Produto produto) {
 		ItemDePedido itemDePedidoProcurado = new ItemDePedido(produto, 0, 0.1);
 
-		return itensDePedido.buscarPor((item1, item2) -> item1.equals(item2) ? 0 : 1, itemDePedidoProcurado);
+		return itensDePedido.buscarPor(new CriterioDeBuscaPorDescricao(), itemDePedidoProcurado);
 	}
 	
 	/**
@@ -48,7 +47,6 @@ public class Pedido implements Comparable<Pedido>{
      * @return true/false indicando se a inclusão do produto no pedido foi realizada com sucesso.
      */
 	public boolean incluirProduto(Produto novo, int quantidade) {
-
 		ItemDePedido itemDePedido = existeNoPedido(novo);
 
 		if (itemDePedido != null) {
@@ -72,10 +70,7 @@ public class Pedido implements Comparable<Pedido>{
 	*/
 	public double valorFinal() {
 
-		double valorPedido = itensDePedido.somarMultiplicacoes(
-				item -> item.getPrecoVenda(),
-				item -> item.getQuantidade()
-		);
+		double valorPedido = itensDePedido.somarMultiplicacoes(item -> item.getPrecoVenda(), item -> item.getQuantidade()); // Para o valor final do pedido, faz o seguinte: pega a lista de pedidos e aplica a função da classe lista somarMultiplicacoes. Essa função recebe duas funções (arrow function) que vão ser usadas pra fazer calculo de valor. Laaa na classe lista, recebe as funções onde uma vai virar um double e a outra um int que vão ser usadas pra somar todos os valores da lista.
 
 		if (formaDePagamento == 1) {
 			valorPedido = valorPedido * (1.0 - DESCONTO_PG_A_VISTA);

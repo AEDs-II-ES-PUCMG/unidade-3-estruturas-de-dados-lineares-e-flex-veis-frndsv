@@ -93,6 +93,7 @@ public class Lista<E> implements Iterable<E> {
         }
         return null;
     }
+
     // Tarefa 2
     public double somarMultiplicacoes(Function<E, Double> extratorValor, Function<E, Integer> extratorFator) {
         if (vazia()) {
@@ -101,13 +102,14 @@ public class Lista<E> implements Iterable<E> {
         double soma = 0;
         Celula<E> atual = primeiro.getProximo();
         while (atual != null) {
-            double valor = extratorValor.apply(atual.getItem());
-            int fator = extratorFator.apply(atual.getItem());
-            soma += valor * fator;
-            atual = atual.getProximo();
+            double valor = extratorValor.apply(atual.getItem()); // Recebeu a arrow function do parametro. Agora, a variável valor vai fazer/pedir o seguinte: Aplica a função recebida (extratorValor), mandando como parametro o item atual. A função mandada como parametro laaa na classe Pedido foi item -> item.getPrecoVenda(), ou seja, retornar o preco de venda do item que for passado como parametro. A assinatura é Function<E, Double>, ou seja, recebe uma função e retorna um double. Exatamente o que aconteceu aqui.
+            int fator = extratorFator.apply(atual.getItem()); // Recebeu a arrow function do parametro. Agora, a variável fator vai fazer/pedir o seguinte: Aplica a função recebida (extratorFator), mandando como parametro o item atual. A função mandada como parametro laaa na classe Pedido foi item -> item.getQuantidade(), ou seja, retornar a quantidade do item que for passado como parametro. A assinatura é Function<E, Integer>, ou seja, recebe uma função e retorna um int. Exatamente o que aconteceu aqui.
+            soma += valor * fator; // Multiplica e soma pra soma total
+            atual = atual.getProximo(); 
         }
         return soma;
     }
+
     // Tarefa 3
     public Lista<E> filtrar(Predicate<E> condicional) {
         if (vazia()) {
@@ -166,17 +168,13 @@ public class Lista<E> implements Iterable<E> {
 
     
 	public Lista<E> extrairLote(int numItens) {
-
 		Lista<E> novaLista = new Lista<E>();
 
 		int contador = 0;
 
 		while (!this.vazia() && contador < numItens) {
-
 			E item = this.removerInicio();
-
 			novaLista.inserirFinal(item);
-
 			contador++;
 		}
 
